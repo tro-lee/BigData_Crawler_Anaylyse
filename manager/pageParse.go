@@ -5,36 +5,30 @@ import (
 )
 
 type PageParser struct {
-	dataCh  chan *PageData
+	dataCh  []*PageData
 	manager *Manager
 }
 
 func NewPageParser(manager *Manager) *PageParser {
 	parse := new(PageParser)
-	parse.dataCh = make(chan *PageData)
+	parse.dataCh = make([]*PageData, 0)
 	parse.manager = manager
 	return parse
 }
 
 func (p *PageParser) SendPageData(data *PageData) {
-	p.dataCh <- data
+	p.dataCh = append(p.dataCh, data)
 }
 
 func (p *PageParser) Run() {
-	for {
-		data, ok := <-p.dataCh
-		if !ok {
-			break
-		}
-		p.parsePageData(data)
+	result := make([]FilmData, 0)
+	for _, data := range p.dataCh {
+		result = append(result, p.parsePageData(data)...)
 	}
+	p.manager.ParserFinished(result)
 }
 
-func (p *PageParser) Close() {
-	close(p.dataCh)
-}
-
-func (p *PageParser) parsePageData(data *PageData) {
+func (p *PageParser) parsePageData(data *PageData) []FilmData {
 	filmNameReg := regexp.MustCompile(`<img width="100" alt="(?s:(.*?))"`)
 	filmNames := filmNameReg.FindAllStringSubmatch(data.data, -1)
 
@@ -65,9 +59,5 @@ func (p *PageParser) parsePageData(data *PageData) {
 		}
 	}
 
-	p.finished(films)
-}
-
-func (p *PageParser) finished(films []FilmData) {
-	p.manager.ParserFinished(films)
+	return films
 }

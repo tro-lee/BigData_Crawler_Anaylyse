@@ -2,6 +2,7 @@ package manager
 
 import (
 	"douban/utils"
+	"fmt"
 )
 
 type Manager struct {
@@ -28,11 +29,10 @@ func New() *Manager {
 
 func (m Manager) Run() {
 	for _, getter := range m.pageGetters {
-		go func(getter *PageGetter) {
-			getter.Run()
-		}(getter)
+		getter.Run()
 	}
 
+	fmt.Println(m.PageParser.dataCh)
 	m.PageParser.Run()
 }
 
@@ -42,30 +42,12 @@ func (m *Manager) GetterFininshed(data *PageData) {
 
 func (m *Manager) ParserFinished(data []FilmData) {
 	m.RawResults = append(m.RawResults, data...)
-
-	if checkGetterAndPerserFinished(m) {
-		m.final()
-	}
-}
-
-func checkGetterAndPerserFinished(manager *Manager) bool {
-	if len(manager.PageParser.dataCh) > 0 {
-		return false
-	}
-
-	for _, getter := range manager.pageGetters {
-		if !getter.isFinish {
-			return false
-		}
-	}
-
-	return true
+	m.final()
 }
 
 func (m *Manager) final() {
 	realResult := m.processRawData()
 
-	// m.PageParser.Close()
 	m.Result <- realResult
 	close(m.Result)
 }
