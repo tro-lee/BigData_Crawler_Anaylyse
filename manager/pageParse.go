@@ -1,61 +1,61 @@
-package main
+package manager
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
 	"regexp"
-
-	"github.com/golang/glog"
 )
 
-type PageParse struct {
-	dataCh chan *PageData
+type PageParser struct {
+	dataCh  chan *PageData
+	manager *Manager
 }
 
-func NewPageParse() *PageParse {
-	parse := new(PageParse)
+func NewPageParser(manager *Manager) *PageParser {
+	parse := new(PageParser)
 	parse.dataCh = make(chan *PageData)
+	parse.manager = manager
 	return parse
 }
 
-func (p *PageParse) Run() {
-	select {
-	case data := <-p.dataCh:
+func (p *PageParser) SendPageData(data *PageData) {
+	p.dataCh <- data
+}
+
+func (p *PageParser) Run() {
+	for {
+		data, ok := <-p.dataCh
+		if !ok {
+			break
+		}
 		p.parsePageData(data)
 	}
 }
 
-func (p *PageParse) SendPageData(data *PageData) {
-	p.dataCh <- data
+func (p *PageParser) Close() {
+	close(p.dataCh)
 }
 
-func (p *PageParse) parsePageData(data *PageData) {
+func (p *PageParser) parsePageData(data *PageData) {
 	filmNameReg := regexp.MustCompile(`<img width="100" alt="(?s:(.*?))"`)
 	filmNames := filmNameReg.FindAllStringSubmatch(data.data, -1)
-	glog.Infoln(filmNames)
 
 	filmScoreReg := regexp.MustCompile(`<span class="rating_num" property="v:average">(.*)</span>`)
 	filmScores := filmScoreReg.FindAllStringSubmatch(data.data, -1)
-	glog.Infoln(filmScores)
 
 	filmScoreNumReg := regexp.MustCompile(`<span>(.*)人评价</span>`)
 	filmScoreNum := filmScoreNumReg.FindAllStringSubmatch(data.data, -1)
-	glog.Infoln(filmScoreNum)
 
 	filmCommentReg := regexp.MustCompile(`<span class="inq">(.*)</span>`)
 	filmComments := filmCommentReg.FindAllStringSubmatch(data.data, -1)
-	glog.Infoln(filmComments)
 
 	filmContentReg := regexp.MustCompile(`(?s)<p class="">(.*?)</p>`)
 	filmContents := filmContentReg.FindAllStringSubmatch(data.data, -1)
-	glog.Infoln(filmContents)
 
 	films := make([]FilmData, len(filmNames))
 	for i := 0; i < len(films); i++ {
 		if len(filmComments) <= i {
 			filmComments = append(filmComments, []string{"", ""})
 		}
+
 		films[i] = FilmData{
 			Name:    filmNames[i][1],
 			Score:   filmScores[i][1],
@@ -65,28 +65,9 @@ func (p *PageParse) parsePageData(data *PageData) {
 		}
 	}
 
-	err := p.save2File(films, data.index)
-	if err != nil {
-		glog.Errorf("%d page data save to File error %e", data.index, err)
-	}
+	p.finished(films)
 }
 
-func (p *PageParse) save2File(films []FilmData, page uint) error {
-	f, err := os.Create(fmt.Sprintf("result %d.json", page))
-	if err != nil {
-		return err
-	}
-
-	defer f.Close()
-
-	bytes, err := json.MarshalIndent(films, "", "\t")
-	if err != nil {
-		return err
-	}
-	_, err = f.WriteString(string(bytes))
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (p *PageParser) finished(films []FilmData) {
+	p.manager.ParserFinished(films)
 }

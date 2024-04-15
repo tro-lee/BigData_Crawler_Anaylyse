@@ -1,39 +1,46 @@
-package main
+package manager
 
 import (
 	"io"
+	"log"
 	"net/http"
-
-	"github.com/golang/glog"
 )
 
 type PageGetter struct {
-	url     string
-	index   uint
-	manager *Manager
+	url      string
+	index    int
+	manager  *Manager
+	isFinish bool
 }
 
-func NewPageGetter(url string, index uint, manager *Manager) (getter *PageGetter) {
+func NewPageGetter(url string, index int, manager *Manager) (getter *PageGetter) {
 	getter = new(PageGetter)
 	getter.url = url
 	getter.index = index
 	getter.manager = manager
+	getter.isFinish = false
 	return
 }
 
 func (g *PageGetter) Run() {
-	request, err := http.NewRequest("GET", g.url, nil)
-
+	result, err := g.getPageData()
 	if err != nil {
-		glog.Errorf("PageGetter Run new request error %e", err)
-		return
+		log.Fatal(err)
+	}
+
+	g.finsihed(&PageData{data: result, index: g.index})
+}
+
+func (g *PageGetter) getPageData() (string, error) {
+	request, err := http.NewRequest("GET", g.url, nil)
+	if err != nil {
+		return "", err
 	}
 
 	request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36")
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
-		glog.Errorf("PageGetter Run get data error %e", err)
-		return
+		return "", err
 	}
 
 	defer resp.Body.Close()
@@ -56,11 +63,13 @@ func (g *PageGetter) Run() {
 	}
 
 	if err != nil {
-		glog.Errorf("PageGetter Run read data error %e", err)
+		return "", err
 	}
 
-	g.manager.SendPageData(&PageData{
-		data:  result,
-		index: g.index,
-	})
+	return result, nil
+}
+
+func (g *PageGetter) finsihed(page *PageData) {
+	g.manager.GetterFininshed(page)
+	g.isFinish = true
 }
