@@ -13,7 +13,7 @@ func main() {
 
 	result := <-manager.Result
 
-	fmt.Println("本次爬取到的数据为：", len(result))
+	fmt.Println("本次取到的数据长度为：", len(result))
 	jsonData, _ := json.Marshal(result)
 	utils.JsonToFile(jsonData, "result.json")
 }
