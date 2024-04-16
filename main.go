@@ -1,8 +1,8 @@
 package main
 
 import (
-	"douban/manager"
-	"douban/utils"
+	"bigdata/manager"
+	"bigdata/utils"
 	"encoding/json"
 	"fmt"
 )

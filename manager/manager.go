@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"douban/utils"
+	"bigdata/utils"
 	"fmt"
 )
 
