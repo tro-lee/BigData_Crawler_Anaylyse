@@ -15,5 +15,5 @@ func main() {
 
 	fmt.Println("本次取到的数据长度为：", len(result))
 	jsonData, _ := json.Marshal(result)
-	utils.JsonToFile(jsonData, "result.json")
+	utils.JsonToFile(jsonData, "./result/result.json")
 }

@@ -7,9 +7,11 @@ const currentDir = path.dirname(import.meta.url)
 
 export default defineConfig({
   plugins: [react()],
+  root: './visualization',
+  publicDir: './result',
   resolve: {
     alias: {
-      '@data': currentDir+ '/../result/result.json'
+      '@data': './../../result/result.json'
     }
   }
 })
