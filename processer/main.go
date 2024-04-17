@@ -49,7 +49,7 @@ func main() {
 		words := segCut(clearNews[i].Title)
 
 		for _, word := range words {
-			reg := regexp.MustCompile("^[0-9a-zA-Z[:space:][:punct:]]+$")
+			reg := regexp.MustCompile("^[0-9a-zA-Z[:space:]，：（）《》〈〉“；—、`”.,;_+='？！]+$")
 			if !reg.MatchString(word) {
 				titleResult[word]++
 			}
@@ -57,7 +57,8 @@ func main() {
 
 		contents := segCut(clearNews[i].Summary)
 		for _, content := range contents {
-			reg := regexp.MustCompile("^[0-9a-zA-Z[:space:][:punct:]]+$")
+			reg := regexp.MustCompile("^[0-9a-zA-Z[:space:]，：（）《》〈〉“；—、`”.,;_+='？！]+$")
+
 			if !reg.MatchString(content) {
 				contentResult[content]++
 			}

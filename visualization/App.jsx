@@ -1,9 +1,9 @@
-import LinePlot from './modules/LinePlot';
-
+import SegChartsPro from './modules/SegChartsPro'
 function App() {
   return (
     <>
-      <LinePlot></LinePlot>
+      {/* <SegCharts></SegCharts> */}
+      <SegChartsPro></SegChartsPro>
     </>
   )
 }
