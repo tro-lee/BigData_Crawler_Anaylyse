@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "vis": "vite ./visualization",
+    "vis": "vite",
     "crawler": "./build/crawler",
-    "crawler-build": "cd ./crawler && go build -o ../build/crawler"
+    "crawler-build": "cd ./crawler && go build -o ../build/crawler",
+    "processer": "./build/processer -path='./result/crawler.json'",
+    "processer-build": "cd ./processer && go build -o ../build/processer"
   },
   "dependencies": {
     "d3": "^7.9.0",

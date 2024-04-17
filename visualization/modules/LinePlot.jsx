@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { useEffect } from "react";
 
 export default function LinePlot({
   data,
@@ -9,15 +10,46 @@ export default function LinePlot({
   marginBottom = 20,
   marginLeft = 20
 }) {
-  const x = d3.scaleLinear([0, data.length - 1], [marginLeft, width - marginRight]);
-  const y = d3.scaleLinear(d3.extent(data), [height - marginBottom, marginTop]);
-  const line = d3.line((d, i) => x(i), y);
+  useEffect(() => {
+    const data = [12, 2, 3, 4, 50, 1]
+    demo(data, ".demo")
+  }, [])
+
   return (
-    <svg width={width} height={height}>
-      <path fill="none" stroke="currentColor" strokeWidth="1.5" d={line(data)} />
-      <g fill="white" stroke="currentColor" strokeWidth="1.5">
-        {data.map((d, i) => (<circle key={i} cx={x(i)} cy={y(d)} r="2.5" />))}
-      </g>
-    </svg>
+    <svg class="demo"></svg>
   );
+}
+
+/**
+ * 
+ * @param {any[]} data 
+ * @param {string} selector 
+ */
+function demo(data, selector) {
+  const svg = d3.select(selector)
+    .attr("width", 700)
+    .attr("height", 300);
+
+  const scaleLiner = d3.scaleLinear()
+
+
+  svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => i * 70)
+    .attr("y", (d, i) => 200 - 10 * d)
+    .attr("width", 65)
+    .attr("height", (d, i) => d * 10)
+    .attr("fill", "green")
+
+  svg.selectAll("text")
+    .data(data)
+    .enter()
+    .append("text")
+    .text((d) => d)
+    .attr("x", (d, i) => i * 70 + 30)
+    .attr("y", (d, i) => 200 - 10 * d - 3)
+    .attr("fill", "white")
+    .attr("text-anchor", "middle")
 }

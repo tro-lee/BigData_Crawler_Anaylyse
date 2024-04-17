@@ -1,18 +1,12 @@
-import data from '@data';
-import './App.css';
+import LinePlot from './modules/LinePlot';
 
 function App() {
-  console.log(getData());
   return (
     <>
-    1111111111111111111111
-      {/* <LinePlot></LinePlot> */}
+      <LinePlot></LinePlot>
     </>
   )
 }
 
 export default App
 
-function getData() {
-  return data
-}
