@@ -70,6 +70,19 @@ func main() {
 
 	contentJson, _ := json.Marshal(contentResult)
 	JsonToFile(contentJson, "./result/seg_content_result.json")
+
+	// 提取国家关键字
+	countryRegex := getCountryRegex()
+	countryResult := make(map[string]int, len(clearNews))
+
+	for _, value := range clearNews {
+		if countryRegex.MatchString(value.Title) {
+			title := countryRegex.Find([]byte(value.Title))
+			countryResult[string(title)]++
+		}
+	}
+	countryJson, _ := json.Marshal(countryResult)
+	JsonToFile(countryJson, "./result/country_result.json")
 }
 
 func GetClearData(news []News) ([]ClearNews, error) {
