@@ -1,6 +1,6 @@
 import * as echarts from 'echarts';
 import { useEffect } from 'react';
-import segTitle from '../../result/seg_title_result.json';
+import segTitle from '../../result/country_result.json';
 
 export default function () {
   useEffect(() => {
@@ -29,8 +29,7 @@ function genEcharts(result) {
 
   option = {
     title: {
-      text: '2023-2024年新闻',
-      subtext: '热门词频',
+      text: '国家词频',
       left: 'center'
     },
     tooltip: {
@@ -50,8 +49,7 @@ function genEcharts(result) {
       {
         name: 'Radius Mode',
         type: 'pie',
-        radius: [20, 140],
-        center: ['25%', '50%'],
+        radius: [20, 300],
         roseType: 'radius',
         itemStyle: {
           borderRadius: 5
@@ -66,17 +64,6 @@ function genEcharts(result) {
         },
         data: result
       },
-      {
-        name: 'Area Mode',
-        type: 'pie',
-        radius: [20, 140],
-        center: ['75%', '50%'],
-        roseType: 'area',
-        itemStyle: {
-          borderRadius: 5
-        },
-        data: result
-      }
     ]
   };
 
