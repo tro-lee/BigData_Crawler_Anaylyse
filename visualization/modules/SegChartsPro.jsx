@@ -50,7 +50,7 @@ function genEcharts(result) {
       {
         name: 'Radius Mode',
         type: 'pie',
-        radius: [20, 140],
+        radius: [20, 300],
         center: ['25%', '50%'],
         roseType: 'radius',
         itemStyle: {
@@ -69,7 +69,7 @@ function genEcharts(result) {
       {
         name: 'Area Mode',
         type: 'pie',
-        radius: [20, 140],
+        radius: [20, 300],
         center: ['75%', '50%'],
         roseType: 'area',
         itemStyle: {
