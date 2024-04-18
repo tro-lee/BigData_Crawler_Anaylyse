@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 
@@ -67,9 +68,11 @@ func main() {
 
 	titleJson, _ := json.Marshal(titleResult)
 	JsonToFile(titleJson, "./result/seg_title_result.json")
+	fmt.Println("新闻标题分词完成")
 
 	contentJson, _ := json.Marshal(contentResult)
 	JsonToFile(contentJson, "./result/seg_content_result.json")
+	fmt.Println("新闻内容分词完成")
 
 	// 提取国家关键字
 	countryRegex := getCountryRegex()
@@ -83,6 +86,51 @@ func main() {
 	}
 	countryJson, _ := json.Marshal(countryResult)
 	JsonToFile(countryJson, "./result/country_result.json")
+	fmt.Println("国家关键字提取完成")
+
+	// 提取国家词汇
+	countryResultPro := make(map[string]map[string]int, len(clearNews))
+	for _, value := range clearNews {
+		if countryRegex.MatchString(value.Title) {
+			title := countryRegex.Find([]byte(value.Title))
+			if _, ok := countryResultPro[string(title)]; !ok {
+				countryResultPro[string(title)] = make(map[string]int)
+			}
+
+			words := segCut(value.Title)
+			for _, word := range words {
+				reg := regexp.MustCompile("^[0-9a-zA-Z[:space:]，：（）《》〈〉“；—、`”.,;_+='？！]+$")
+				if !reg.MatchString(word) {
+					countryResultPro[string(title)][word]++
+				}
+			}
+		}
+	}
+	countryJsonPro, _ := json.Marshal(countryResultPro)
+	JsonToFile(countryJsonPro, "./result/country_result_pro.json")
+	fmt.Println("国家词汇提取完成")
+
+	// 判断哪个词汇，国家占比最多
+	countryMaxResult := make(map[string]map[string]int, len(clearNews))
+
+	for key, value := range countryResultPro {
+		max := 0
+		maxKey := ""
+		for k, v := range value {
+			// 如果是国家名，直接跳过
+			if countryRegex.MatchString(k) {
+				continue
+			}
+
+			if v > max {
+				max = v
+				maxKey = k
+			}
+		}
+		countryMaxResult[key] = map[string]int{maxKey: max}
+	}
+	countryMaxJson, _ := json.Marshal(countryMaxResult)
+	JsonToFile(countryMaxJson, "./result/country_max_result.json")
 }
 
 func GetClearData(news []News) ([]ClearNews, error) {
